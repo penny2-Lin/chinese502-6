@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校園劇團的星光挑戰</title>
+    <style>
+        :root {
+            --primary-color: #6c5ce7; /* 紫色代表劇場夢幻 */
+            --secondary-color: #fef9e7;
+            --accent-color: #fdcb6e; /* 金色代表舞台燈光 */
+            --text-color: #2d3436;
+            --blue-hole: #0984e3;
+            --correct-color: #00b894;
+            --wrong-color: #d63031;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #f1f2f6;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            border-bottom: 3px dashed var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .author-note {
+            font-style: italic;
+            text-align: center;
+            color: #636e72;
+            margin-bottom: 30px;
+        }
+
+        .story-content {
+            line-height: 2.3;
+            font-size: 1.15rem;
+            text-align: justify;
+            margin-bottom: 40px;
+            background: #fdfdfd;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        /* 基礎空格樣式 */
+        .blank {
+            display: inline-block;
+            min-width: 90px;
+            border-bottom: 2px solid var(--blue-hole);
+            color: var(--blue-hole);
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            padding: 0 8px;
+            margin: 0 4px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        /* 答對樣式 */
+        .blank.correct { 
+            color: var(--correct-color); 
+            border-bottom: 2px solid transparent; 
+            text-decoration: none !important;
+        }
+
+        /* 答錯樣式：紅色、刪除線、紅色底線 */
+        .blank.wrong { 
+            color: var(--wrong-color) !important; 
+            border-bottom: 2px solid var(--wrong-color) !important; 
+            text-decoration: line-through !important;
+            text-decoration-color: var(--wrong-color);
+            text-decoration-thickness: 2px;
+        }
+
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            background: #f1f2f6;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .word-item {
+            background: white;
+            border: 2px solid var(--primary-color);
+            padding: 8px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .word-item:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .word-item.selected {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: #2d3436;
+        }
+
+        .word-item.used {
+            opacity: 0.4;
+            cursor: default;
+            pointer-events: none;
+            background: #dfe6e9;
+            border-color: #b2bec3;
+            color: #636e72;
+        }
+
+        .detail-panel {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--accent-color);
+            display: none;
+            animation: fadeIn 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-title {
+            font-weight: bold;
+            color: #d35400;
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        button:hover {
+            background: #5b4cc4;
+            transform: scale(1.05);
+        }
+
+        .illustration {
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            margin-bottom: 20px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 60px;
+        }
+
+        .character {
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .feedback-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 0 60px rgba(0,0,0,0.3);
+            z-index: 100;
+            text-align: center;
+            display: none;
+            min-width: 320px;
+        }
+
+        .overlay {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 90;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="illustration">
+            <div class="character">🎭🌟🎬</div>
+        </div>
+
+        <h1>星光劇團的年度公演</h1>
+        <p class="author-note">文／詞語故事設計師 💎</p>
+
+        <!-- 詞語自學區 -->
+        <div id="detailPanel" class="detail-panel">
+            <div id="detailTitle" class="detail-title">詞語自學小筆記</div>
+            <div id="detailContent"></div>
+        </div>
+
+        <!-- 詞庫區 -->
+        <div class="word-bank" id="wordBank">
+            <!-- 由 JS 動態生成 -->
+        </div>
+
+        <!-- 文章內容 -->
+        <div class="story-content" id="storyContent">
+            這學期校園最盛大的活動，就是「星光劇團」的年度大戲——《時空魔法師》。宣傳海報一貼出，同學們都擠在公告欄前想<span class="blank" data-answer="先睹為快"></span>。大家都聽說這次的表演將會運用奇幻的視覺特效，將舞台布置成一個充滿<span class="blank" data-answer="魔法"></span>的神祕世界。
+            <br><br>
+            正式排練開始了，台上的演員們必須緊跟著背景音樂的<span class="blank" data-answer="節奏"></span>移動。這齣戲的成敗，全看大家如何<span class="blank" data-answer="詮釋"></span>自己的角色。飾演女主角的小青，原本擁有一副清亮的<span class="blank" data-answer="嗓音"></span>，沒想到排練前夕因為感冒，聲音變得十分<span class="blank" data-answer="沙啞"></span>。
+            <br><br>
+            「<span class="blank" data-answer="唉唷"></span>！這可怎麼辦？」負責道具的小明剛從器材室跑回來，因為動作太過<span class="blank" data-answer="急促"></span>，整個人顯得<span class="blank" data-answer="氣喘吁吁"></span>。他告訴大家，為了呈現最後大戰的緊張感，壞蛋角色會預先<span class="blank" data-answer="埋伏"></span>在黑幕後方，準備給主角致命的一擊。
+            <br><br>
+            公演當晚，當<span class="blank" data-answer="燦爛"></span>的燈光亮起，整座戲院散發著無與倫比的藝術<span class="blank" data-answer="魅力"></span>。我們在後台聽著如雷的掌聲，心情<span class="blank" data-answer="忽喜忽憂"></span>，既擔心演出出錯，又為同學的精彩表現感到興奮。戲劇讓我們明白，想要完美的成果，背後<span class="blank" data-answer="必須"></span>付出加倍的汗水與努力。
+        </div>
+
+        <div class="controls">
+            <button onclick="checkAnswers()">完成核對答案</button>
+            <button onclick="resetGame()" style="background:#b2bec3; margin-left:10px; box-shadow:none;">重新開始</button>
+        </div>
+    </div>
+
+    <!-- 彈窗與遮罩 -->
+    <div class="overlay" id="overlay"></div>
+    <div class="feedback-modal" id="feedbackModal">
+        <h2 id="feedbackTitle">表演結束！</h2>
+        <p id="feedbackText"></p>
+        <button onclick="closeModal()">回舞台修改</button>
+    </div>
+
+    <script>
+        const vocabulary = {
+            "先睹為快": { def: "以優先看到而引以為樂。", ex: "每當這位作家的新書問市，他總是要先睹為快。" },
+            "節奏": { def: "比喻有規律的進行流程；音樂中強弱、長短的規律現象。", ex: "這首歌的節奏輕快，聽了讓人忍不住想跳舞。" },
+            "燦爛": { def: "形容光彩美麗。", ex: "黑漆漆的天空，被五顏六色的煙火點綴得光明燦爛。" },
+            "魔法": { def: "具有神祕色彩的法術。", ex: "這本童話書彷彿施了魔法，讓我讀得目不轉睛。" },
+            "嗓音": { def: "喉嚨所發出的聲音。", ex: "這名歌手的嗓音清亮，唱起高音非常動聽。" },
+            "沙啞": { def: "聲音低沉嘶啞。", ex: "他的聲音因重感冒而變得沙啞，只能低聲說話。" },
+            "急促": { def: "迅速倉促。", ex: "哥哥剛跑完短跑，呼吸顯得很急促。" },
+            "氣喘吁吁": { def: "大聲喘氣、呼吸急促的樣子。", ex: "爬了五層樓，大家累得氣喘吁吁。" },
+            "埋伏": { def: "暗中躲藏，伺機行動。", ex: "警察在巷子裡埋伏，成功抓到了壞人。" },
+            "唉唷": { def: "嘆詞。表示驚訝、痛苦或感嘆。", ex: "唉唷！他不小心踢到了桌腳。" },
+            "必須": { def: "一定要、必定要。", ex: "想要有好成績，就必須下苦功學習。" },
+            "忽喜忽憂": { def: "時而歡喜，時而憂傷。", ex: "看著計分板上的數字，觀眾的心情忽喜忽憂。" },
+            "詮釋": { def: "詳細深入的解釋、闡明或演出。", ex: "演員用自己的方式詮釋了這個歷史人物。" },
+            "魅力": { def: "吸引人的力量。", ex: "這部電影充滿魅力，上映第一天就大受好評。" }
+        };
+
+        let selectedWord = null;
+
+        function init() {
+            const wordBank = document.getElementById('wordBank');
+            const words = Object.keys(vocabulary);
+            // 打亂順序
+            const shuffled = words.sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(word => {
+                const div = document.createElement('div');
+                div.className = 'word-item';
+                div.innerText = word;
+                div.onclick = () => selectWord(word, div);
+                wordBank.appendChild(div);
+            });
+
+            const blanks = document.querySelectorAll('.blank');
+            blanks.forEach(blank => {
+                blank.onclick = () => fillBlank(blank);
+            });
+        }
+
+        function selectWord(word, element) {
+            document.querySelectorAll('.word-item').forEach(el => el.classList.remove('selected'));
+            
+            const panel = document.getElementById('detailPanel');
+            const content = document.getElementById('detailContent');
+            const title = document.getElementById('detailTitle');
+            
+            panel.style.display = 'block';
+            title.innerText = `💡 詞語探索：${word}`;
+            content.innerHTML = `<p><strong>【意思】</strong>${vocabulary[word].def}</p><p><strong>【例句】</strong>${vocabulary[word].ex}</p>`;
+
+            selectedWord = word;
+            element.classList.add('selected');
+        }
+
+        function fillBlank(blank) {
+            // 點擊即清空結果樣式
+            blank.classList.remove('correct', 'wrong');
+
+            if (!selectedWord) {
+                // 如果點擊已填入的空格，顯示該詞的資訊
+                if (blank.innerText) {
+                    const currentWord = blank.innerText;
+                    selectWord(currentWord, findWordItem(currentWord));
+                }
+                return;
+            }
+
+            // 如果空格已有舊詞，將舊詞回歸詞庫
+            if (blank.innerText) {
+                const oldWord = blank.innerText;
+                const oldItem = findWordItem(oldWord);
+                if (oldItem) oldItem.classList.remove('used');
+            }
+
+            blank.innerText = selectedWord;
+            
+            // 標示詞庫中的詞為已使用
+            const selectedItem = document.querySelector('.word-item.selected');
+            if (selectedItem) selectedItem.classList.add('used');
+
+            selectedWord = null;
+            document.querySelectorAll('.word-item').forEach(el => el.classList.remove('selected'));
+        }
+
+        function findWordItem(word) {
+            return Array.from(document.querySelectorAll('.word-item')).find(el => el.innerText === word);
+        }
+
+        function checkAnswers() {
+            const blanks = document.querySelectorAll('.blank');
+            let correctCount = 0;
+
+            blanks.forEach(blank => {
+                const answer = blank.getAttribute('data-answer');
+                const userVal = blank.innerText;
+
+                blank.classList.remove('correct', 'wrong');
+
+                if (userVal === answer) {
+                    blank.classList.add('correct');
+                    correctCount++;
+                } else if (userVal) {
+                    blank.classList.add('wrong');
+                }
+            });
+
+            const modal = document.getElementById('feedbackModal');
+            const overlay = document.getElementById('overlay');
+            const title = document.getElementById('feedbackTitle');
+            const text = document.getElementById('feedbackText');
+
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
+
+            if (correctCount === blanks.length) {
+                title.innerText = "🏆 完美演出！";
+                text.innerText = "你真棒！所有的詞語都精確地找到了它們的位置。";
+            } else {
+                title.innerText = "🎬 再接再厲！";
+                text.innerText = `你成功填對了 ${correctCount} 個詞語。紅色刪除線標示的是需要調整的地方，加油！`;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function resetGame() {
+            location.reload();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
